@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector</title>
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    .hero {
+      background: linear-gradient(45deg, #2196f3, #21cbf3);
+      color: white;
+      padding: 80px 0;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+    }
+    .input-area, .result-area {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="blue darken-2">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Fake News Detector</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="#about">About</a></li>
+        <li><a href="#detector">Detector</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero center-align" id="about">
+      <div class="container">
+        <h1>Detect Fake News Instantly</h1>
+        <p>Our AI-powered application analyzes your text and tells you whether it's likely to be fake or real news.  Easy, fast, and reliable.</p>
+      </div>
+    </section>
+
+    <div class="container" id="detector">
+      <!-- Input Card -->
+      <div class="card input-area">
+        <div class="card-content">
+          <span class="card-title">Enter Your Article Text</span>
+          <div class="row">
+            <div class="input-field col s12">
+              <textarea id="news-text" class="materialize-textarea" data-length="10000"></textarea>
+              <label for="news-text">Article Content</label>
+            </div>
+          </div>
+          <div class="right-align">
+            <button id="analyze-btn" class="btn waves-effect waves-light blue darken-2">
+              <i class="material-icons left">search</i>Analyze
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div class="card result-area" style="display: none;">
+        <div class="card-content">
+          <span class="card-title">Prediction Result</span>
+          <p id="result-text" class="flow-text"></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="page-footer blue darken-2">
+    <div class="container">
+      <div class="row">
+        <div class="col s12">
+          <h5 class="white-text">Fake News Detector</h5>
+          <p class="grey-text text-lighten-4">Built with FastAPI, scikit-learn, and Materialize CSS.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container center-align">
+        © 2025 Fake News Detector
+      </div>
+    </div>
+  </footer>
+
+  <!-- Materialize JS & Initialization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      M.textareaAutoResize(document.getElementById('news-text'));
+    });
+
+    document.getElementById('analyze-btn').addEventListener('click', async () => {
+      const text = document.getElementById('news-text').value.trim();
+      if (!text) {
+        M.toast({html: 'Please enter some text to analyze.', classes: 'red'});
+        return;
+      }
+
+      const resultCard = document.querySelector('.result-area');
+      const resultText = document.getElementById('result-text');
+      resultCard.style.display = 'none';
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text })
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+
+        resultText.textContent = data.prediction === 'FAKE'
+          ? '⚠️ The article is likely FAKE!'
+          : '✅ The article appears to be REAL.';
+        resultCard.style.display = 'block';
+      } catch (err) {
+        M.toast({html: 'Error: ' + err.message, classes: 'red'});
+      }
+    });
+  </script>
+</body>
+</html>
