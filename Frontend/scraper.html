@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Scraper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #6200ea;
+      --accent-color: #03dac6;
+      --bg-color: #f9f9f9;
+      --text-color: #333;
+      --border-radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      padding: 2rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    form {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+    }
+
+    input[type="url"] {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: border 0.3s ease;
+    }
+
+    input[type="url"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #3700b3;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      color: var(--primary-color);
+    }
+
+    textarea {
+      width: 100%;
+      max-width: 500px;
+      height: 300px;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      resize: vertical;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      form, textarea {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Python Web Scraper</h1>
+  <form id="scrape-form">
+    <label>
+      Website URL:
+      <input type="url" id="url" placeholder="https://example.com" required />
+    </label>
+    <label class="checkbox-wrapper">
+      <input type="checkbox" id="followRedirects" checked />
+      Follow Redirects
+    </label>
+    <button type="submit">
+      <span class="material-icons" style="vertical-align: middle;">cloud_download</span>
+      &nbsp;Scrape
+    </button>
+  </form>
+
+  <h2>Scraped Text</h2>
+  <textarea readonly id="output" placeholder="Scraped content will appear here..."></textarea>
+
+  <script>
+    const form = document.getElementById('scrape-form');
+    const output = document.getElementById('output');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('url').value;
+      const followRedirects = document.getElementById('followRedirects').checked;
+
+      try {
+        const res = await fetch('http://localhost:8000/scrape', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, follow_redirects: followRedirects }),
+        });
+
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+
+        const data = await res.json();
+        output.value = data.text;
+      } catch (err) {
+        output.value = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
